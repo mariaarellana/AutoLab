@@ -157,23 +157,25 @@ def detect_motion(frameCount):
             chooseClass = np.squeeze(classes).astype(np.int32)
             chooseScore = np.squeeze(scores)
             limit = len(chooseClass)
-            now = int(time.time())
-
+            nowTime = int(time.time())
+            formatTime = str(time.ctime())
             for i in range(0, limit):
                 if chooseScore[i] > 0.60 and chooseClass[i] < 7:
                     classesDb = int(chooseClass[i])
-                    scoresDb = float(chooseScore[i])
-                    sql = "INSERT INTO `database-1`.database1 (`id`, `classes`, `scores`, `datetime`) VALUES (%s, %s, %s, %s)"
-                    values = (None, classesDb, scoresDb, now)
+                    scoresDb = round(float(chooseScore[i]), 2)
+                    sql = "INSERT INTO `database-1`.database1 (`id`, `classes`, `scores`, `datetime`, `formatTime`) VALUES (%s, %s, %s, %s, %s)"
+                    values = (None, classesDb, scoresDb, nowTime, formatTime)
                     cur = connection.cursor()
                     cur.execute(sql, values)
                     connection.commit()
                     print(chooseClass[i])
                     print(chooseScore[i])
-                    print(now)
+                    print(nowTime)
+                    print(formatTime)
                     # Emitting Events Socket.io
                     sio.emit("ClassData", classesDb)
                     sio.emit("ScoreData", scoresDb)
+                    sio.emit("formattime", formatTime)
         total += 1
         # acquire the lock, set the output frame, and release the
         # lock
